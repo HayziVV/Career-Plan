@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pitch Interativo — Desenvolvimento de Software, Web &amp; Game Dev</title>
+  <style>
+/* ==========================================================================
+   PITCH INTERATIVO — CORES VIVAS & ELEGANTES + ANIMAÇÕES FLUIDAS
+   ========================================================================== */
+
+:root {
+  --bg-deep: #060913;
+  --bg-surface: rgba(15, 23, 42, 0.72);
+  --bg-card: rgba(22, 33, 62, 0.65);
+  --border-subtle: rgba(148, 163, 184, 0.16);
+  --border-bright: rgba(56, 189, 248, 0.45);
+
+  --text-main: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  /* Paleta Viva & Elegante */
+  --vivid-cyan: #00f2fe;
+  --vivid-blue: #38bdf8;
+  --vivid-violet: #a855f7;
+  --vivid-emerald: #10b981;
+  --vivid-amber: #f59e0b;
+  --vivid-rose: #f43f5e;
+
+  --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  line-height: 1.65;
+  overflow-x: hidden;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Barra de progresso no topo */
+.scroll-progress-track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  z-index: 100;
+}
+
+.scroll-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--vivid-cyan), var(--vivid-violet), var(--vivid-emerald));
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.7);
+  transition: width 0.12s linear;
+}
+
+/* Fundo dinâmico com orbes de luz e canvas */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#bgCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  opacity: 0.28;
+  animation: floatOrb 18s ease-in-out infinite alternate;
+}
+
+.orb-cyan {
+  width: 440px;
+  height: 440px;
+  background: radial-gradient(circle, var(--vivid-cyan), transparent 70%);
+  top: -8%;
+  left: -6%;
+}
+
+.orb-violet {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, var(--vivid-violet), transparent 70%);
+  bottom: 5%;
+  right: -8%;
+  animation-delay: -6s;
+}
+
+.orb-emerald {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, var(--vivid-emerald), transparent 70%);
+  top: 42%;
+  left: 48%;
+  animation-delay: -11s;
+}
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(35px, -30px) scale(1.08); }
+  100% { transform: translate(-25px, 25px) scale(0.95); }
+}
+
+/* Navegação Superior */
+.top-nav {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(94%, 1080px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 20px;
+  background: rgba(10, 15, 30, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  z-index: 80;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-size: 0.92rem;
+  color: var(--text-main);
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--vivid-cyan), var(--vivid-violet));
+  box-shadow: 0 0 10px var(--vivid-cyan);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 13px;
+  border-radius: 999px;
+  transition: all 0.28s var(--ease-fluid);
+}
+
+.nav-link:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.nav-link.active {
+  color: #060913;
+  background: linear-gradient(135deg, var(--vivid-cyan), var(--vivid-blue));
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.45);
+}
+
+.theme-glow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-fluid);
+}
+
+.theme-glow-btn:hover {
+  border-color: var(--vivid-cyan);
+  background: rgba(0, 242, 254, 0.12);
+}
+
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vivid-emerald);
+  box-shadow: 0 0 8px var(--vivid-emerald);
+  animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.65; }
+}
+
+/* Indicadores Laterais (Dots) */
+.side-dots {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 75;
+}
+
+.dot-btn {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-fluid);
+}
+
+.dot-btn:hover,
+.dot-btn.active {
+  border-color: var(--vivid-cyan);
+  background: var(--vivid-cyan);
+  box-shadow: 0 0 12px var(--vivid-cyan);
+  transform: scale(1.25);
+}
+
+.dot-tooltip {
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  background: rgba(15, 23, 42, 0.92);
+  color: var(--text-main);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  border: 1px solid var(--border-subtle);
+  transition: all 0.25s var(--ease-fluid);
+}
+
+.dot-btn:hover .dot-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Container Principal & Seções Full-Screen de Fluxo Contínuo */
+.pitch-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+.pitch-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 110px 24px 80px;
+  position: relative;
+}
+
+.section-inner {
+  width: min(100%, 920px);
+  margin: 0 auto;
+}
+
+/* Animação de Entrada ao Descer a Página */
+.reveal-block {
+  opacity: 0;
+  transform: translateY(38px);
+  transition: opacity 0.8s var(--ease-fluid), transform 0.8s var(--ease-fluid);
+}
+
+.reveal-block.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero Section */
+.eyebrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 242, 254, 0.1);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  color: var(--vivid-cyan);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-size: clamp(2.1rem, 4.8vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  margin-bottom: 20px;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, var(--vivid-cyan), var(--vivid-violet), var(--vivid-emerald));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientFlow 6s linear infinite;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+.hero-lead {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--text-secondary);
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+/* Pills de Tecnologia no Hero */
+.hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 42px;
+}
+
+.tech-pill {
+  padding: 7px 15px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: transform 0.25s var(--ease-fluid), box-shadow 0.25s var(--ease-fluid);
+}
+
+.tech-pill:hover {
+  transform: translateY(-3px);
+}
+
+.pill-cyan {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: rgba(0, 242, 254, 0.4);
+  color: #67e8f9;
+}
+.pill-blue {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #93c5fd;
+}
+.pill-amber {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #fcd34d;
+}
+.pill-emerald {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
+}
+.pill-violet {
+  background: rgba(168, 85, 247, 0.14);
+  border-color: rgba(168, 85, 247, 0.45);
+  color: #d8b4fe;
+}
+.pill-rose {
+  background: rgba(244, 63, 94, 0.14);
+  border-color: rgba(244, 63, 94, 0.45);
+  color: #fda4af;
+}
+.pill-slate {
+  background: rgba(148, 163, 184, 0.14);
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #e2e8f0;
+}
+
+/* Botão de Rolagem */
+.scroll-prompt {
+  margin-top: 12px;
+}
+
+.scroll-down-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--vivid-cyan), var(--vivid-violet));
+  color: #060913;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  box-shadow: 0 8px 25px rgba(0, 242, 254, 0.32);
+  transition: transform 0.3s var(--ease-fluid), box-shadow 0.3s var(--ease-fluid);
+}
+
+.scroll-down-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(168, 85, 247, 0.5);
+}
+
+.scroll-down-btn svg {
+  animation: bounceArrow 1.8s infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+/* Tags de Capítulo & Títulos */
+.chapter-tag {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.tag-cyan { background: rgba(0, 242, 254, 0.12); color: var(--vivid-cyan); }
+.tag-emerald { background: rgba(16, 185, 129, 0.14); color: var(--vivid-emerald); }
+.tag-violet { background: rgba(168, 85, 247, 0.14); color: #c084fc; }
+.tag-amber { background: rgba(245, 158, 11, 0.14); color: #fbbf24; }
+.tag-rose { background: rgba(244, 63, 94, 0.16); color: #fb7185; }
+
+.section-title {
+  font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 22px;
+  letter-spacing: -0.02em;
+}
+
+.accent-cyan { color: var(--vivid-cyan); }
+.accent-emerald { color: var(--vivid-emerald); }
+.accent-violet { color: #c084fc; }
+.accent-amber { color: #fbbf24; }
+
+/* Blocos de Texto Direto (Narrative Cards) */
+.narrative-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--vivid-cyan);
+  border-radius: 16px;
+  padding: 26px 30px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s var(--ease-fluid), border-color 0.3s var(--ease-fluid), box-shadow 0.3s var(--ease-fluid);
+}
+
+.narrative-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 242, 254, 0.4);
+  box-shadow: 0 20px 45px rgba(0, 242, 254, 0.12);
+}
+
+.card-emerald-glow { border-left-color: var(--vivid-emerald); }
+.card-emerald-glow:hover { border-color: rgba(16, 185, 129, 0.45); box-shadow: 0 20px 45px rgba(16, 185, 129, 0.12); }
+
+.card-violet-glow { border-left-color: var(--vivid-violet); }
+.card-violet-glow:hover { border-color: rgba(168, 85, 247, 0.45); box-shadow: 0 20px 45px rgba(168, 85, 247, 0.14); }
+
+.card-amber-glow { border-left-color: var(--vivid-amber); }
+.card-amber-glow:hover { border-color: rgba(245, 158, 11, 0.45); box-shadow: 0 20px 45px rgba(245, 158, 11, 0.12); }
+
+.narrative-text {
+  font-size: 1.08rem;
+  color: var(--text-secondary);
+  line-height: 1.72;
+}
+
+.narrative-text + .narrative-text {
+  margin-top: 14px;
+}
+
+.narrative-text strong {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* Painel Interativo da Stack Web */
+.interactive-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 22px 26px;
+  margin-bottom: 22px;
+}
+
+.panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.panel-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.stack-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stack-tab {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-fluid);
+}
+
+.stack-tab:hover {
+  color: var(--text-main);
+  border-color: var(--vivid-cyan);
+}
+
+.stack-tab.active {
+  background: linear-gradient(135deg, var(--vivid-cyan), var(--vivid-blue));
+  color: #060913;
+  border-color: transparent;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.38);
+}
+
+.stack-detail-box {
+  background: rgba(6, 9, 19, 0.55);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 18px 20px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.stack-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.stack-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-cyan { background: rgba(0, 242, 254, 0.16); color: var(--vivid-cyan); }
+.badge-blue { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; }
+.badge-amber { background: rgba(245, 158, 11, 0.18); color: #fcd34d; }
+
+.stack-detail-header h3 {
+  font-size: 1.15rem;
+  color: var(--text-main);
+}
+
+.stack-detail-box p {
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+}
+
+/* Grid de Roadmap (GoLang) */
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.roadmap-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-fluid);
+}
+
+.roadmap-step:hover,
+.roadmap-step.active-step {
+  border-color: var(--vivid-emerald);
+  background: rgba(16, 185, 129, 0.09);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
+}
+
+.step-num {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vivid-emerald);
+  margin-bottom: 6px;
+}
+
+.roadmap-step h4 {
+  font-size: 1.08rem;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.roadmap-step p {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+
+/* Cards de Game Dev & 3D */
+.gamedev-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.game-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 22px;
+  transition: all 0.3s var(--ease-fluid);
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 16px 36px rgba(168, 85, 247, 0.16);
+}
+
+.game-card-top {
+  margin-bottom: 10px;
+}
+
+.game-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.game-card h3 {
+  font-size: 1.15rem;
+  color: var(--text-main);
+}
+
+.game-card p {
+  font-size: 0.94rem;
+  color: var(--text-secondary);
+}
+
+/* Terminal Linux Interativo */
+.terminal-window {
+  background: #090d16;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+  margin-bottom: 28px;
+}
+
+.terminal-bar {
+  background: #111827;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.term-dots {
+  display: flex;
+  gap: 7px;
+}
+
+.t-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.dot-red { background: #ef4444; }
+.dot-yellow { background: #f59e0b; }
+.dot-green { background: #10b981; }
+
+.term-title {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.term-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.term-cmd-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.term-cmd-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: var(--vivid-amber);
+}
+
+.terminal-body {
+  padding: 20px 22px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.term-line {
+  margin-bottom: 10px;
+}
+
+.term-prompt {
+  color: var(--vivid-emerald);
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+.term-cmd {
+  color: var(--vivid-cyan);
+  font-weight: 600;
+}
+
+.term-output {
+  color: #e2e8f0;
+  padding-left: 6px;
+  border-left: 2px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Links de Próximo Bloco e Voltar ao Topo */
+.next-step-nav {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.next-block-link {
+  color: var(--vivid-cyan);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.next-block-link:hover {
+  background: rgba(0, 242, 254, 0.1);
+  transform: translateX(4px);
+}
+
+.back-top-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.back-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.25s var(--ease-fluid);
+}
+
+.back-top-btn:hover {
+  border-color: var(--vivid-cyan);
+  background: rgba(0, 242, 254, 0.14);
+  transform: translateY(-2px);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .top-nav {
+    top: 10px;
+    padding: 8px 14px;
+  }
+  .nav-links {
+    display: none;
+  }
+  .side-dots {
+    right: 10px;
+  }
+  .pitch-section {
+    padding: 90px 18px 60px;
+  }
+  .narrative-card {
+    padding: 20px;
+  }
+}
+
+</style>
+</head>
+<body>
+  <!-- Barra de progresso de leitura no topo -->
+  <div class="scroll-progress-track" aria-hidden="true">
+    <div class="scroll-progress-bar" id="scrollProgressBar"></div>
+  </div>
+
+  <!-- Fundo dinâmico com orbes de luz e canvas de partículas -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="orb orb-cyan"></div>
+    <div class="orb orb-violet"></div>
+    <div class="orb orb-emerald"></div>
+    <canvas id="bgCanvas"></canvas>
+  </div>
+
+  <!-- Navegação flutuante minimalista -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <span class="brand-dot"></span>
+      <span class="brand-text">DEV.PITCH</span>
+    </div>
+    <nav class="nav-links" aria-label="Seções do Pitch">
+      <a href="#sec-intro" class="nav-link active" data-section="sec-intro">Início</a>
+      <a href="#sec-web" class="nav-link" data-section="sec-web">Web Full Stack</a>
+      <a href="#sec-roadmap" class="nav-link" data-section="sec-roadmap">GoLang &amp; Planos</a>
+      <a href="#sec-gamedev" class="nav-link" data-section="sec-gamedev">Game Dev &amp; 3D</a>
+      <a href="#sec-linux" class="nav-link" data-section="sec-linux">Linux &amp; Paixão</a>
+    </nav>
+    <button type="button" class="theme-glow-btn" id="toggleParticlesBtn" title="Alternar velocidade das partículas">
+      <span class="pulse-indicator"></span>
+      <span id="particleModeLabel">Modo Fluido</span>
+    </button>
+  </header>
+
+  <!-- Indicador lateral de capítulos (dots) -->
+  <aside class="side-dots" aria-label="Progresso por seção">
+    <button type="button" class="dot-btn active" data-target="sec-intro" aria-label="Ir para Início">
+      <span class="dot-tooltip">Início</span>
+    </button>
+    <button type="button" class="dot-btn" data-target="sec-web" aria-label="Ir para Web Full Stack">
+      <span class="dot-tooltip">Web Full Stack</span>
+    </button>
+    <button type="button" class="dot-btn" data-target="sec-roadmap" aria-label="Ir para GoLang e Planos">
+      <span class="dot-tooltip">GoLang &amp; Planos</span>
+    </button>
+    <button type="button" class="dot-btn" data-target="sec-gamedev" aria-label="Ir para Game Dev e 3D">
+      <span class="dot-tooltip">Game Dev &amp; 3D</span>
+    </button>
+    <button type="button" class="dot-btn" data-target="sec-linux" aria-label="Ir para Linux e Computação">
+      <span class="dot-tooltip">Linux &amp; Computação</span>
+    </button>
+  </aside>
+
+  <main class="pitch-container">
+    <!-- SEÇÃO 1: HERO / ABERTURA -->
+    <section id="sec-intro" class="pitch-section hero-section">
+      <div class="section-inner reveal-block is-visible">
+        <div class="eyebrow-badge">
+          <span class="eyebrow-icon">&#9889;</span>
+          <span>APRESENTAÇÃO &amp; PITCH DE 1 PÁGINA</span>
+        </div>
+        <h1 class="hero-title">
+          Desenvolvimento de Software,<br>
+          <span class="gradient-text" id="typingHighlight">Web Full Stack &amp; Game Dev</span>
+        </h1>
+        <p class="hero-lead">
+          Uma jornada guiada pela construção de aplicações web modernas, exploração criativa no desenvolvimento de jogos e modelagem 3D, e uma paixão genuína por Linux e computadores.
+        </p>
+
+        <div class="hero-pills">
+          <span class="tech-pill pill-cyan">HTML &amp; CSS</span>
+          <span class="tech-pill pill-blue">JavaScript &amp; TypeScript</span>
+          <span class="tech-pill pill-amber">Python</span>
+          <span class="tech-pill pill-emerald">Futuro: GoLang</span>
+          <span class="tech-pill pill-violet">Godot &amp; Blender</span>
+          <span class="tech-pill pill-rose">Flutter &amp; Flame</span>
+          <span class="tech-pill pill-slate">Linux &amp; Hardware</span>
+        </div>
+
+        <div class="scroll-prompt">
+          <a href="#sec-web" class="scroll-down-btn" aria-label="Descer para o próximo bloco">
+            <span>Desça para explorar o pitch</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M19 12l-7 7-7-7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 2: QUEM SOU & WEB FULL STACK -->
+    <section id="sec-web" class="pitch-section">
+      <div class="section-inner reveal-block">
+        <div class="chapter-tag tag-cyan">01 // NÚCLEO PROFISSIONAL</div>
+        <h2 class="section-title">Quem Sou &amp; Foco em <span class="accent-cyan">Web Full Stack</span></h2>
+
+        <div class="narrative-card tilt-card">
+          <p class="narrative-text">
+            Sou um desenvolvedor de software com foco em <strong>Web Full Stack</strong>, trabalhando diretamente na construção de aplicações completas e bem estruturadas. Minha base combina o domínio das tecnologias essenciais da web — <strong>HTML</strong> e <strong>CSS</strong> — com o poder e a versatilidade das linguagens <strong>JavaScript</strong>, <strong>TypeScript</strong> e <strong>Python</strong>.
+          </p>
+          <p class="narrative-text">
+            Transito com naturalidade entre a criação de interfaces modernas, responsivas e tipadas no front-end e a estruturação de regras de negócio, automações e integrações no back-end.
+          </p>
+        </div>
+
+        <!-- Filtro / Explorador interativo da Stack Web -->
+        <div class="interactive-panel">
+          <div class="panel-header">
+            <span class="panel-label">Explore cada tecnologia da minha base Web:</span>
+            <div class="stack-tabs" role="tablist">
+              <button type="button" class="stack-tab active" data-tech="htmlcss">HTML &amp; CSS</button>
+              <button type="button" class="stack-tab" data-tech="jsts">JavaScript &amp; TypeScript</button>
+              <button type="button" class="stack-tab" data-tech="python">Python</button>
+            </div>
+          </div>
+          <div class="stack-detail-box" id="stackDetailBox">
+            <div class="stack-detail-header">
+              <span class="stack-badge badge-cyan" id="stackDetailBadge">Fundação Front-End</span>
+              <h3 id="stackDetailTitle">HTML5 Semântico &amp; CSS Moderno</h3>
+            </div>
+            <p id="stackDetailDesc">
+              Estruturação semântica limpa, layouts fluidos com Flexbox e Grid, responsividade em múltiplos dispositivos e animações elegantes que valorizam a experiência do usuário.
+            </p>
+          </div>
+        </div>
+
+        <div class="next-step-nav">
+          <a href="#sec-roadmap" class="next-block-link">Próximo bloco: Planos com GoLang &darr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 3: PRÓXIMO PASSO & EXPANSÃO DE REPERTÓRIO (GOLANG) -->
+    <section id="sec-roadmap" class="pitch-section">
+      <div class="section-inner reveal-block">
+        <div class="chapter-tag tag-emerald">02 // PLANOS DE CARREIRA &amp; EVOLUÇÃO</div>
+        <h2 class="section-title">Próximo Passo: <span class="accent-emerald">GoLang</span> no Repertório</h2>
+
+        <div class="narrative-card tilt-card card-emerald-glow">
+          <p class="narrative-text">
+            Tenho a intenção clara de futuramente aprender <strong>GoLang (Go)</strong> para melhorar e expandir meu repositório de tecnologias. Enxergo o aprendizado contínuo como parte essencial da evolução como engenheiro de software.
+          </p>
+          <p class="narrative-text">
+            Unir minha base atual em <strong>JavaScript, TypeScript e Python</strong> com a performance compilada, tipagem forte e concorrência nativa do <strong>Go</strong> permitirá criar arquiteturas back-end e ferramentas ainda mais rápidas e escaláveis.
+          </p>
+        </div>
+
+        <!-- Linha do Tempo Interativa da Evolução -->
+        <div class="roadmap-grid">
+          <div class="roadmap-step active-step" tabindex="0" data-step="1">
+            <div class="step-num">Hoje</div>
+            <h4>Base Full Stack Consolidada</h4>
+            <p>Domínio prático de HTML, CSS, JavaScript, TypeScript e Python no desenvolvimento web.</p>
+          </div>
+          <div class="roadmap-step future-step" tabindex="0" data-step="2">
+            <div class="step-num">Próximo Passo</div>
+            <h4>Adoção de GoLang</h4>
+            <p>Expansão estratégica do repositório técnico focada em serviços de alta performance e concorrência.</p>
+          </div>
+          <div class="roadmap-step vision-step" tabindex="0" data-step="3">
+            <div class="step-num">Visão Contínua</div>
+            <h4>Engenharia Versátil</h4>
+            <p>Capacidade de escolher a linguagem ideal para cada desafio técnico, do navegador ao servidor.</p>
+          </div>
+        </div>
+
+        <div class="next-step-nav">
+          <a href="#sec-gamedev" class="next-block-link">Próximo bloco: Game Dev, Godot &amp; Blender &darr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 4: DESENVOLVIMENTO DE JOGOS & MODELAGEM 3D -->
+    <section id="sec-gamedev" class="pitch-section">
+      <div class="section-inner reveal-block">
+        <div class="chapter-tag tag-violet">03 // CRIATIVIDADE TÉCNICA &amp; MUNDO 3D</div>
+        <h2 class="section-title">Desenvolvimento de Jogos: <span class="accent-violet">Godot, Blender &amp; Flame</span></h2>
+
+        <div class="narrative-card tilt-card card-violet-glow">
+          <p class="narrative-text">
+            Tenho grande interesse em desenvolvimento de jogos, unindo lógica de programação com arte e interatividade. Meu primeiro contato prático com o universo de criação de jogos foi utilizando <strong>Flutter</strong> e a <strong>Flame Engine</strong>, experiência que abriu as portas para o funcionamento de game loops, física e gerenciamento de estados.
+          </p>
+          <p class="narrative-text">
+            Atualmente estou aprendendo tanto a engine <strong>Godot</strong> quanto o <strong>Blender</strong> para modelagem 3D — contando já com uma <strong>boa prática dentro da ferramenta Blender</strong> para esculpir, modelar e preparar objetos tridimensionais para jogos.
+          </p>
+        </div>
+
+        <div class="gamedev-cards">
+          <article class="game-card tilt-card">
+            <div class="game-card-top">
+              <span class="game-tag tag-rose">Primeiro Contato</span>
+              <h3>Flutter &amp; Flame Engine</h3>
+            </div>
+            <p>
+              Ponto de partida na criação de jogos: compreensão na prática de ciclos de renderização 2D, detecção de colisão, componentes e interatividade fluida.
+            </p>
+          </article>
+
+          <article class="game-card tilt-card">
+            <div class="game-card-top">
+              <span class="game-tag tag-violet">Aprendizado Ativo</span>
+              <h3>Godot Engine</h3>
+            </div>
+            <p>
+              Estudo dedicado à construção de cenas, arquitetura baseada em nós e programação de mecânicas de jogo completas em uma engine aberta e versátil.
+            </p>
+          </article>
+
+          <article class="game-card tilt-card">
+            <div class="game-card-top">
+              <span class="game-tag tag-amber">Boa Prática Adquirida</span>
+              <h3>Blender (Modelagem 3D)</h3>
+            </div>
+            <p>
+              Experiência prática sólida dentro da ferramenta Blender para criação de malhas 3D, proporção visual e construção de assets autorais para projetos interativos.
+            </p>
+          </article>
+        </div>
+
+        <div class="next-step-nav">
+          <a href="#sec-linux" class="next-block-link">Próximo bloco: Paixão por Linux &amp; Computadores &darr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 5: PAIXÃO POR LINUX, COMPUTADORES & DESENVOLVIMENTO -->
+    <section id="sec-linux" class="pitch-section">
+      <div class="section-inner reveal-block">
+        <div class="chapter-tag tag-amber">04 // ESSÊNCIA &amp; CULTURA TECH</div>
+        <h2 class="section-title">Paixão por <span class="accent-amber">Linux, Computadores</span> &amp; Software</h2>
+
+        <div class="narrative-card tilt-card card-amber-glow">
+          <p class="narrative-text">
+            Acima de qualquer framework isolado, sou movido por uma verdadeira paixão por <strong>Linux</strong>, por <strong>computadores em geral</strong> e pelo <strong>desenvolvimento de software</strong>. Gosto de entender como o sistema operacional gerencia recursos, como o hardware conversa com o software e como o ambiente de linha de comando potencializa a produtividade.
+          </p>
+          <p class="narrative-text">
+            Essa curiosidade genuína faz com que programar não seja apenas uma tarefa mecânica, mas um exercício contínuo de criação, resolução de problemas e evolução técnica constante.
+          </p>
+        </div>
+
+        <!-- Terminal Linux Interativo Simulado -->
+        <div class="terminal-window">
+          <div class="terminal-bar">
+            <div class="term-dots">
+              <span class="t-dot dot-red"></span>
+              <span class="t-dot dot-yellow"></span>
+              <span class="t-dot dot-green"></span>
+            </div>
+            <span class="term-title">dev@linux-workstation: ~/pitch</span>
+            <div class="term-actions">
+              <button type="button" class="term-cmd-btn" data-cmd="whoami">whoami</button>
+              <button type="button" class="term-cmd-btn" data-cmd="stack">cat stack.txt</button>
+              <button type="button" class="term-cmd-btn" data-cmd="gamedev">cat gamedev.txt</button>
+              <button type="button" class="term-cmd-btn" data-cmd="paixao">cat paixao.txt</button>
+            </div>
+          </div>
+          <div class="terminal-body" id="terminalBody">
+            <div class="term-line"><span class="term-prompt">dev@linux:~$</span> <span class="term-cmd" id="termTypedCmd">cat resumo_pitch.txt</span></div>
+            <div class="term-output" id="termOutput">
+              &gt; Foco Principal: Desenvolvedor de Software Web Full Stack<br>
+              &gt; Tecnologias Web: HTML, CSS, JavaScript, TypeScript e Python<br>
+              &gt; Próximo Passo: Aprender GoLang para expandir o repositório técnico<br>
+              &gt; Game Dev &amp; 3D: Aprendendo Godot e Blender (já com boa prática no Blender) | Primeiro contato via Flutter + Flame Engine<br>
+              &gt; Essência: Paixão por Linux, computadores em geral e desenvolvimento de software.
+            </div>
+          </div>
+        </div>
+
+        <div class="back-top-wrap">
+          <a href="#sec-intro" class="back-top-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+            <span>Voltar ao topo do Pitch</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+/* ==========================================================================
+   SCRIPT.JS — INTERATIVIDADE, ANIMAÇÕES DE SCROLL, PARTÍCULAS E TERMINAL
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  // 1. Dados da Stack Web para o painel interativo da Seção 01
+  const stackData = {
+    htmlcss: {
+      badge: 'Fundação Front-End',
+      badgeClass: 'badge-cyan',
+      title: 'HTML5 Semântico & CSS Moderno',
+      desc: 'Construção da estrutura e identidade visual da web. Uso de marcação acessível, layouts responsivos com Flexbox e CSS Grid, variáveis dinâmicas e animações fluidas.'
+    },
+    jsts: {
+      badge: 'Interatividade & Tipagem',
+      badgeClass: 'badge-blue',
+      title: 'JavaScript & TypeScript Full Stack',
+      desc: 'Desenvolvimento de aplicações dinâmicas no cliente e no servidor, aproveitando a segurança da tipagem estática do TypeScript para manter o código escalável e confiável.'
+    },
+    python: {
+      badge: 'Back-End & Versatilidade',
+      badgeClass: 'badge-amber',
+      title: 'Python no Desenvolvimento de Software',
+      desc: 'Linguagem essencial na minha stack para construção de lógica de servidor, APIs, scripts de automação e resolução ágil de problemas no ecossistema web full stack.'
+    }
+  };
+
+  // 2. Dados do Terminal Linux na Seção 04
+  const terminalCommands = {
+    whoami: {
+      cmd: 'whoami --verbose',
+      output:
+        '> Desenvolvedor de Software com foco em Web Full Stack.<br>' +
+        '> Apaixonado por Linux, computadores em geral e engenharia de software.<br>' +
+        '> Sempre explorando novas tecnologias, de linguagens de alto desempenho ao mundo 3D.'
+    },
+    stack: {
+      cmd: 'cat stack_e_planos.txt',
+      output:
+        '> [Web Base]: HTML & CSS<br>' +
+        '> [Linguagens Atuais]: JavaScript, TypeScript e Python<br>' +
+        '> [Futuro / Roadmap]: Intenção de aprender GoLang para melhorar o repositório de tecnologias.'
+    },
+    gamedev: {
+      cmd: 'cat gamedev_3d.txt',
+      output:
+        '> [Primeiro Contato]: Flutter & Flame Engine<br>' +
+        '> [Estudo Atual]: Aprendendo Godot Engine e Blender simultaneamente<br>' +
+        '> [Prática Consolidada]: Já possuo uma boa prática dentro da ferramenta Blender para modelagem.'
+    },
+    paixao: {
+      cmd: 'cat paixao.txt',
+      output:
+        '> Sistema Operacional favorito: Linux<br>' +
+        '> Interesses centrais: Computadores em geral, arquitetura e desenvolvimento de software.'
+    }
+  };
+
+  // 3. Atualização da barra de progresso e seções ativas no scroll
+  const progressBar = document.getElementById('scrollProgressBar');
+  const sections = document.querySelectorAll('.pitch-section');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const dotBtns = document.querySelectorAll('.dot-btn');
+  const revealBlocks = document.querySelectorAll('.reveal-block');
+
+  function updateScrollProgress() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / docHeight) * 100)) : 0;
+    if (progressBar) {
+      progressBar.style.width = pct + '%';
+    }
+  }
+
+  window.addEventListener('scroll', updateScrollProgress, { passive: true });
+  updateScrollProgress();
+
+  // IntersectionObserver para revelar os blocos suavemente e marcar a seção ativa
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      },
+      { threshold: 0.18 }
+    );
+
+    revealBlocks.forEach(function (block) {
+      revealObserver.observe(block);
+    });
+
+    const sectionObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            navLinks.forEach(function (link) {
+              link.classList.toggle('active', link.getAttribute('data-section') === id);
+            });
+            dotBtns.forEach(function (dot) {
+              dot.classList.toggle('active', dot.getAttribute('data-target') === id);
+            });
+          }
+        });
+      },
+      { threshold: 0.45 }
+    );
+
+    sections.forEach(function (sec) {
+      sectionObserver.observe(sec);
+    });
+  } else {
+    revealBlocks.forEach(function (b) {
+      b.classList.add('is-visible');
+    });
+  }
+
+  // Clique nos dots laterais
+  dotBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const targetId = btn.getAttribute('data-target');
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // 4. Tabs interativas da Stack Web (Seção 01)
+  const stackTabs = document.querySelectorAll('.stack-tab');
+  const stackDetailBox = document.getElementById('stackDetailBox');
+  const stackDetailBadge = document.getElementById('stackDetailBadge');
+  const stackDetailTitle = document.getElementById('stackDetailTitle');
+  const stackDetailDesc = document.getElementById('stackDetailDesc');
+
+  stackTabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      const key = tab.getAttribute('data-tech');
+      const info = stackData[key];
+      if (!info) return;
+
+      stackTabs.forEach(function (t) {
+        t.classList.remove('active');
+      });
+      tab.classList.add('active');
+
+      if (stackDetailBox) {
+        stackDetailBox.style.opacity = '0';
+        stackDetailBox.style.transform = 'translateY(6px)';
+        setTimeout(function () {
+          if (stackDetailBadge) {
+            stackDetailBadge.className = 'stack-badge ' + info.badgeClass;
+            stackDetailBadge.textContent = info.badge;
+          }
+          if (stackDetailTitle) stackDetailTitle.textContent = info.title;
+          if (stackDetailDesc) stackDetailDesc.textContent = info.desc;
+          stackDetailBox.style.opacity = '1';
+          stackDetailBox.style.transform = 'translateY(0)';
+        }, 160);
+      }
+    });
+  });
+
+  // 5. Seleção interativa dos cartões de Roadmap (Seção 02)
+  const roadmapSteps = document.querySelectorAll('.roadmap-step');
+  roadmapSteps.forEach(function (step) {
+    step.addEventListener('click', function () {
+      roadmapSteps.forEach(function (s) {
+        s.classList.remove('active-step');
+      });
+      step.classList.add('active-step');
+    });
+  });
+
+  // 6. Comandos do Terminal Linux (Seção 04)
+  const termCmdBtns = document.querySelectorAll('.term-cmd-btn');
+  const termTypedCmd = document.getElementById('termTypedCmd');
+  const termOutput = document.getElementById('termOutput');
+
+  termCmdBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const key = btn.getAttribute('data-cmd');
+      const entry = terminalCommands[key];
+      if (!entry || !termTypedCmd || !termOutput) return;
+
+      termTypedCmd.textContent = entry.cmd;
+      termOutput.style.opacity = '0.25';
+      setTimeout(function () {
+        termOutput.innerHTML = entry.output;
+        termOutput.style.opacity = '1';
+      }, 120);
+    });
+  });
+
+  // 7. Canvas de partículas de fundo com modo fluido / turbo
+  const canvas = document.getElementById('bgCanvas');
+  const toggleBtn = document.getElementById('toggleParticlesBtn');
+  const modeLabel = document.getElementById('particleModeLabel');
+  let speedMultiplier = 1;
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function () {
+      if (speedMultiplier === 1) {
+        speedMultiplier = 2.6;
+        if (modeLabel) modeLabel.textContent = 'Modo Turbo';
+      } else if (speedMultiplier > 1) {
+        speedMultiplier = 0.25;
+        if (modeLabel) modeLabel.textContent = 'Modo Calmo';
+      } else {
+        speedMultiplier = 1;
+        if (modeLabel) modeLabel.textContent = 'Modo Fluido';
+      }
+    });
+  }
+
+  if (canvas && canvas.getContext) {
+    const ctx = canvas.getContext('2d');
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    window.addEventListener('resize', function () {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const colors = ['#00f2fe', '#a855f7', '#10b981', '#f59e0b'];
+    const particles = [];
+    const count = 42;
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 2.2 + 0.8,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        color: colors[i % colors.length]
+      });
+    }
+
+    function renderParticles() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx * speedMultiplier;
+        p.y += p.vy * speedMultiplier;
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+
+        // Linhas sutis conectando partículas próximas
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 130) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = 'rgba(148, 163, 184, ' + (1 - dist / 130) * 0.14 + ')';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(renderParticles);
+    }
+
+    renderParticles();
+  }
+})();
+
+</script>
+</body>
+</html>
